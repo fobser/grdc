@@ -102,9 +102,6 @@ main(int argc, char *argv[])
 
 	initscr();
 
-	if (pledge("stdio tty", NULL) == -1)
-		err(1, "pledge");
-
 	signal(SIGINT, sighndl);
 	signal(SIGTERM, sighndl);
 	signal(SIGHUP, sighndl);
