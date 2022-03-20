@@ -16,9 +16,7 @@
 #include <curses.h>
 #include <err.h>
 #include <limits.h>
-#include <poll.h>
 #include <signal.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
@@ -68,11 +66,10 @@ int
 main(int argc, char *argv[])
 {
 	long t, a;
-	int i, j, s, k, rv;
+	int i, j, s, k;
 	int scrol;
 	unsigned int n = 0;
 	struct timespec delay;
-	struct pollfd pfd;
 	const char *errstr;
 	long scroldelay = 50000000;
 	int xbase;
@@ -113,9 +110,6 @@ main(int argc, char *argv[])
 	signal(SIGHUP, sighndl);
 	signal(SIGWINCH, sigresize);
 	signal(SIGCONT, sigresize);	/* for resizes during suspend */
-
-	pfd.fd = STDIN_FILENO;
-	pfd.events = POLLIN;
 
 	cbreak();
 	noecho();
@@ -237,13 +231,7 @@ main(int argc, char *argv[])
 		/* want scrolling to END on the second */
 		if (scrol && !wintoosmall)
 			delay.tv_nsec -= 5 * scroldelay;
-		rv = ppoll(&pfd, 1, &delay, NULL);
-		if (rv == 1) {
-			char q = 0;
-			read(STDIN_FILENO, &q, 1);
-			if (q == 'q')
-				sigalrmed = 1;
-		}
+		nanosleep(&delay, NULL);
 		now.tv_sec++;
 
 		if (sigtermed) {
